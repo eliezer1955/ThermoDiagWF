@@ -15,6 +15,7 @@ using Emgu.Util;
 using System.Drawing;
 using System.Net.Sockets;
 using System.Threading.Tasks;
+using System.Reflection;
 
 namespace ThermoDiagWF
 {
@@ -41,48 +42,23 @@ namespace ThermoDiagWF
         VideoCapture capture;
         public int valve;
         public int valvepos;
+        public Form1 parent;
         public struct CCStatsOp
         {
             public Rectangle Rectangle;
             public int Area;
         }
-        private Mat myErode( Mat src, int val )
+        private Mat myErode(Mat src, int val)
         {
             int erosion_size = val;
             var dest = new Mat();
-            CvInvoke.Erode( src, dest, null, new System.Drawing.Point( -1, -1 ), val, BorderType.Default, CvInvoke.MorphologyDefaultBorderValue );
+            CvInvoke.Erode(src, dest, null, new System.Drawing.Point(-1, -1), val, BorderType.Default, CvInvoke.MorphologyDefaultBorderValue);
             var dest1 = new Mat();
-            CvInvoke.Dilate( dest, dest1, null, new System.Drawing.Point( -1, -1 ), val, BorderType.Default, CvInvoke.MorphologyDefaultBorderValue );
+            CvInvoke.Dilate(dest, dest1, null, new System.Drawing.Point(-1, -1), val, BorderType.Default, CvInvoke.MorphologyDefaultBorderValue);
             return dest1;
         }
-        /*Errors
-        busy ready error
-        @ '  no error
-        A a  syringe failed to initialize
-        B b invalid commad
-        C c invalid argument
-        D d communication error
-        E e invalid “R” command
-        F f supply voltage too low
-        G g device not initialized
-        H h program in progress
-        I i syringe overload
-        J j not used
-        K k syringe move not allowed
-        L l cannot move against limit
-        M m expanded NVM failed
-        O o command buffer overflow
-        P p not used
-        Q p 1loops nested too deep
-        R r program label not found
-        S s end of program not found
-        T t HOME not set
-        V v too many program calls
-        W w program not found
-        X x not used
-        Y y syringe position corrupted
-        Z z syringe may go past home
-        */
+
+
 
         /// <summary>
         /// Establish socket connection
@@ -97,9 +73,9 @@ namespace ThermoDiagWF
             {
                 //get name of comport associated to Thermo (as obtained by Listports.py)
                 ComPortMap map = new ComPortMap();
-                comport = map.GetComPort( "Thermo" );
+                comport = map.GetComPort("THERMO");
                 thermoPort.PortName = comport;
-                thermoPort.BaudRate = 9600;
+                thermoPort.BaudRate = 38400;
                 thermoPort.DataBits = 8;
                 thermoPort.StopBits = StopBits.One;
                 thermoPort.Parity = Parity.None;
@@ -109,30 +85,30 @@ namespace ThermoDiagWF
             }
             catch (Exception ex)
             {
-                MessageBox.Show( comport + " Exception: " + ex.Message );
+                MessageBox.Show(comport + " Exception: " + ex.Message);
             }
 
         }
 
 
-        public ThermoController( string runthis, Form1 parentIn )
+        public ThermoController(string runthis, Form1 parentIn)
         {
             localFolder = Directory.GetCurrentDirectory();
             serialSetup();
-            capture = new VideoCapture();
+            parent = parentIn;
             CurrentMacro = runthis;
 
         }
 
-        public void MoveValve( int rs485Device, int pos )
+        public void MoveValve(int rs485Device, int pos)
         {
-            thermoPort.WriteLine( string.Format( "/{0}I{1}", rs485Device, pos ) );
+            thermoPort.WriteLine(string.Format("/{0}I{1}", rs485Device, pos));
         }
 
         private void InitializeSyringe()
         {
             // initialize syringe
-            thermoPort.WriteLine( LeftRightChoice == 0 ? "/5ZR" : "/1ZR" );
+            thermoPort.WriteLine(LeftRightChoice == 0 ? "/5ZR" : "/1ZR");
         }
         private void SelectMacro()
         {
@@ -146,47 +122,47 @@ namespace ThermoDiagWF
         {
 
             // Open the Macro File and read it back.
-            using (StreamReader fs = new StreamReader( localFolder + "\\" + CurrentMacro ))
+            using (StreamReader fs = new StreamReader(localFolder + "\\" + CurrentMacro))
             {
                 byte[] b = new byte[1024];
-                System.Text.UTF8Encoding temp = new System.Text.UTF8Encoding( true );
+                System.Text.UTF8Encoding temp = new System.Text.UTF8Encoding(true);
                 string line;
                 string response = "";
                 while ((line = fs.ReadLine()) != null)
                 {
-                    if (line.StartsWith( "SLEEP" ))
+                    if (line.StartsWith("SLEEP"))
                     {
                         int delay = 0;
-                        string[] line1 = line.Split( '#' ); //Disregard comments
-                        string[] parsedLine = line1[0].Split( ',' );
-                        if (string.IsNullOrWhiteSpace( parsedLine[0] )) //Disregard blanks lines
+                        string[] line1 = line.Split('#'); //Disregard comments
+                        string[] parsedLine = line1[0].Split(',');
+                        if (string.IsNullOrWhiteSpace(parsedLine[0])) //Disregard blanks lines
                             continue;
                         if (parsedLine[1] != null)
-                            delay = Int32.Parse( parsedLine[1] );
-                        Thread.Sleep( delay );
+                            delay = Int32.Parse(parsedLine[1]);
+                        Thread.Sleep(delay);
                         continue;
                     }
-                    if (line.StartsWith( "WAIT" ))
+                    if (line.StartsWith("WAIT"))
                     {
-                        string[] line1 = line.Split( '#' ); //Disregard comments
-                        string[] parsedLine = line1[0].Split( ',' );
-                        if (string.IsNullOrWhiteSpace( parsedLine[0] )) //Disregard blanks lines
+                        string[] line1 = line.Split('#'); //Disregard comments
+                        string[] parsedLine = line1[0].Split(',');
+                        if (string.IsNullOrWhiteSpace(parsedLine[0])) //Disregard blanks lines
                             continue;
                         if (parsedLine[1] != null)
                         {
                             bool motionDone = false;
                             do
                             {
-                                Int32.Parse( parsedLine[1] );
-                                thermoPort.WriteLine( "/Q" + parsedLine[1] + "R" );
-                                Thread.Sleep( 100 );
+                                Int32.Parse(parsedLine[1]);
+                                thermoPort.WriteLine("/Q" + parsedLine[1] + "R");
+                                Thread.Sleep(100);
                                 byte c1;
                                 do
                                 {
                                     c1 = (byte)thermoPort.ReadByte();
                                     response += c1;
                                 } while (c1 != '\n');
-                                if ((response.TrimEnd( '\r', '\n' )[2] & 0x40) != 0) continue; //isolate status byte, busy bit
+                                if ((response.TrimEnd('\r', '\n')[2] & 0x40) != 0) continue; //isolate status byte, busy bit
                                 motionDone = true;
                             } while (!motionDone);
 
@@ -194,27 +170,27 @@ namespace ThermoDiagWF
                         continue;
                     }
 
-                    if (line.StartsWith( "ALERT" ))
+                    if (line.StartsWith("ALERT"))
                     {
-                        string[] line1 = line.Split( '#' ); //Disregard comments
-                        string[] parsedLine = line1[0].Split( ',' );
-                        if (string.IsNullOrWhiteSpace( parsedLine[0] )) //Disregard blanks lines
+                        string[] line1 = line.Split('#'); //Disregard comments
+                        string[] parsedLine = line1[0].Split(',');
+                        if (string.IsNullOrWhiteSpace(parsedLine[0])) //Disregard blanks lines
                             continue;
                         if (parsedLine[1] != null)
                             continue;
                     }
 
                     //Actual command
-                    string[] lin1 = line.Split( '#' );
-                    if (!string.IsNullOrWhiteSpace( lin1[0] ))
+                    string[] lin1 = line.Split('#');
+                    if (!string.IsNullOrWhiteSpace(lin1[0]))
                     {
-                        thermoPort.WriteLine( lin1[0] );
+                        thermoPort.WriteLine(lin1[0]);
                         response = "";
                         do
                         {
                             byte RxBuffer = (byte)thermoPort.ReadByte();
                             response += RxBuffer;
-                            if (response.Contains( "\n" )) break;
+                            if (response.Contains("\n")) break;
                         } while (true);
                     }
                 }
@@ -225,11 +201,11 @@ namespace ThermoDiagWF
 
         public Image<Rgb, byte> AcquireFrame()
         {
-            Image<Rgb, float> accum = new Image<Rgb, float>( 640, 480 );
-            Image<Rgb, byte> img = new Image<Rgb, byte>( 640, 480 );
-            for (int i = 0 ; i < 30 ; i++)
+            Image<Rgb, float> accum = new Image<Rgb, float>(640, 480);
+            Image<Rgb, byte> img = new Image<Rgb, byte>(640, 480);
+            for (int i = 0; i < 30; i++)
             {
-                capture.Read( img.Mat );
+                capture.Read(img.Mat);
                 accum += img.Convert<Rgb, float>();
             }
             accum /= 30;
@@ -237,42 +213,42 @@ namespace ThermoDiagWF
             accum.Dispose();
             return img;
         }
-        public double MeniscusFrom2Img( Image<Rgb, byte> img1, Image<Rgb, byte> img2 )
+        public double MeniscusFrom2Img(Image<Rgb, byte> img1, Image<Rgb, byte> img2)
         {
             double delta = int.MaxValue;
             Image<Gray, byte> gray1;
             Image<Gray, byte> gray2;
 
-            gray1 = new Image<Gray, byte>( img1.Rows, img1.Cols );
-            CvInvoke.CvtColor( img1, gray1, Emgu.CV.CvEnum.ColorConversion.Rgb2Gray );
-            gray2 = new Image<Gray, byte>( img2.Rows, img2.Cols );
-            CvInvoke.CvtColor( img2, gray2, Emgu.CV.CvEnum.ColorConversion.Rgb2Gray );
-            gray1 = gray1.AbsDiff( gray2 );
-            gray2 = gray1.ThresholdBinary( new Gray( 3 ), new Gray( 255 ) ).Erode( 5 ).Dilate( 5 );
+            gray1 = new Image<Gray, byte>(img1.Rows, img1.Cols);
+            CvInvoke.CvtColor(img1, gray1, Emgu.CV.CvEnum.ColorConversion.Rgb2Gray);
+            gray2 = new Image<Gray, byte>(img2.Rows, img2.Cols);
+            CvInvoke.CvtColor(img2, gray2, Emgu.CV.CvEnum.ColorConversion.Rgb2Gray);
+            gray1 = gray1.AbsDiff(gray2);
+            gray2 = gray1.ThresholdBinary(new Gray(3), new Gray(255)).Erode(5).Dilate(5);
 
             //CvInvoke.AdaptiveThreshold( gray1, gray2, 255,
             //    AdaptiveThresholdType.MeanC, ThresholdType.Binary, 5, 0.0 );
-            CvInvoke.Imshow( "Before", gray1 );
-            CvInvoke.Imshow( "After", gray2 );
-            CvInvoke.WaitKey( 30 );
+            CvInvoke.Imshow("Before", gray1);
+            CvInvoke.Imshow("After", gray2);
+            CvInvoke.WaitKey(30);
 
 
-            CvInvoke.Imshow( "Subtracted", gray2 );
-            CvInvoke.WaitKey( -1 );
+            CvInvoke.Imshow("Subtracted", gray2);
+            CvInvoke.WaitKey(-1);
 
             Mat imgLabel = new Mat();
             Mat stats = new Mat();
             Mat centroids = new Mat();
 
-            int nLabel = CvInvoke.ConnectedComponentsWithStats( gray2, imgLabel, stats, centroids );
+            int nLabel = CvInvoke.ConnectedComponentsWithStats(gray2, imgLabel, stats, centroids);
             CCStatsOp[] statsOp = new CCStatsOp[stats.Rows];
-            stats.CopyTo( statsOp );
+            stats.CopyTo(statsOp);
             // Find the largest non background component.
             // Note: range() starts from 1 since 0 is the background label.
             int maxval = -1;
             int maxLabel = -1;
-            Rectangle rect1 = new Rectangle( 0, 0, 0, 0 );
-            for (int i = 1 ; i < nLabel ; i++)
+            Rectangle rect1 = new Rectangle(0, 0, 0, 0);
+            for (int i = 1; i < nLabel; i++)
             {
                 int temp = statsOp[i].Area;
                 if (temp > maxval)
@@ -283,22 +259,49 @@ namespace ThermoDiagWF
                 }
             }
 
-            gray2.Draw( rect1, new Gray( 64 ) );
-            CvInvoke.Imshow( "Rect", gray2 );
-            CvInvoke.WaitKey( -1 );
+            gray2.Draw(rect1, new Gray(64));
+            CvInvoke.Imshow("Rect", gray2);
+            CvInvoke.WaitKey(-1);
             if (rect1.Top != 0)
             {
                 delta = rect1.Top - rect1.Bottom;
-                System.Console.WriteLine( rect1.Top.ToString( "G" ) + rect1.Bottom.ToString( "G" ) + delta.ToString( "G" ) );
+                System.Console.WriteLine(rect1.Top.ToString("G") + rect1.Bottom.ToString("G") + delta.ToString("G"));
             }
             return delta;
         }
-        async public Task SocketMode( string[] CmdLineArgs )
+        async public Task SocketMode(string[] CmdLineArgs)
         {
             PipeClient pipeClient = new PipeClient();
-            var mr = new MacroRunner( this, pipeClient, null );
+            var mr = new MacroRunner(this, pipeClient, null);
             //Thread macroThread = new Thread( new ThreadStart( mr.RunMacro ) );
             mr.RunMacro();
+        }
+
+        private delegate void SetControlPropertyThreadSafeDelegate(
+                            System.Windows.Forms.Control control,
+                            string propertyName,
+                            object propertyValue);
+
+        public void SetControlPropertyThreadSafe(
+               Control control,
+               string propertyName,
+               object propertyValue)
+        {
+            if (control.InvokeRequired)
+            {
+                control.Invoke(new SetControlPropertyThreadSafeDelegate
+                (SetControlPropertyThreadSafe),
+                new object[] { control, propertyName, propertyValue });
+            }
+            else
+            {
+                control.GetType().InvokeMember(
+                    propertyName,
+                    BindingFlags.SetProperty,
+                    null,
+                    control,
+                    new object[] { propertyValue });
+            }
         }
     }
 }

@@ -124,7 +124,7 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="ThermoSetup.txt" />
+    <Content Include="bin\Debug\ThermoSetup.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
