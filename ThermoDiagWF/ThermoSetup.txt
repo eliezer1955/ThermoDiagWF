@@ -1,0 +1,46 @@
+/3X0R    #select thermistor 0
+/3DR     #Use full SH model
+/3X1R    #select thermistor 0
+/3DR     #Use full SH model
+/3X2R    #select thermistor 0
+/3DR     #Use full SH model
+/3X3R    #select thermistor 0
+/3DR     #Use full SH model
+/3X4R    #select thermistor 0
+/3DR     #Use full SH model
+/3X5R    #select thermistor 0
+/3DR     #Use full SH model
+/3N0R    #select channel 1
+/3X0R    #select thermistor 0
+/3L0.00113794692R #set TrCoeffA for thermistor 0
+/3M0.000232689429R #set TrCoeffB for thermistor 0
+/3O0.000000093330511R #set TrCoeffC for thermistor 0
+/3X3R    #select thermistor 3
+/3L0.00113794692R #set TrCoeffA for thermistor 3
+/3M00.000232689429R #set TrCoeffB for thermistor 3
+/3O0.000000093330511R #set TrCoeffC for thermistor 3
+/3X3R    #select thermistor 5
+/3L0.00113794692R #set TrCoeffA for thermistor 5
+/3M00.000232689429R #set TrCoeffB for thermistor 5
+/3O0.000000093330511R #set TrCoeffC for thermistor 5
+/3X1R    #select thermistor 1
+# thermistors 1 and 4 have different SH coefficients
+/3L0.00152786595R #set TrCoeffA for thermistor 1
+/3M0.000243706279R #set TrCoeffB for thermistor 1
+/3O-0.000000356562509R #set TrCoeffC for thermistor 1
+/3X4R    #select thermistor 4
+/3L0.00152786595R #set TrCoeffA for thermistor 4
+/3M0.000243706279R #set TrCoeffB for thermistor 4
+/3O-0.000000356562509R #set TrCoeffC for thermistor 4
+/3U5R    #select thermistor 6 for channel 1
+/3N1R    #select channel 2
+/3U0R    #select thermistor 1 for channel 2
+/3N2R    #select channel 3
+/3U3R    #select thermistor 4 for channel 3
+/3N0R    #select channel 1 (chiller)
+/3t3R    #set temp to 3C
+/3ZR    #start controlling
+/3F1R    #select fan 1
+/3P255R  #set full power for fan 1
+/3ER     #save to EEPROM
+/4ER     #save to EEPROM
