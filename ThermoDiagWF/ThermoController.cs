@@ -102,13 +102,13 @@ namespace ThermoDiagWF
 
         public void MoveValve(int rs485Device, int pos)
         {
-            thermoPort.WriteLine(string.Format("/{0}I{1}", rs485Device, pos));
+            thermoPort.Write(string.Format("/{0}I{1}\r\n", rs485Device, pos));
         }
 
         private void InitializeSyringe()
         {
             // initialize syringe
-            thermoPort.WriteLine(LeftRightChoice == 0 ? "/5ZR" : "/1ZR");
+            thermoPort.Write(LeftRightChoice == 0 ? "/5ZR\r\n" : "/1ZR\r\n");
         }
         private void SelectMacro()
         {
@@ -154,7 +154,7 @@ namespace ThermoDiagWF
                             do
                             {
                                 Int32.Parse(parsedLine[1]);
-                                thermoPort.WriteLine("/Q" + parsedLine[1] + "R");
+                                thermoPort.Write("/Q" + parsedLine[1] + "R\r\n");
                                 Thread.Sleep(100);
                                 byte c1;
                                 do
@@ -184,7 +184,7 @@ namespace ThermoDiagWF
                     string[] lin1 = line.Split('#');
                     if (!string.IsNullOrWhiteSpace(lin1[0]))
                     {
-                        thermoPort.WriteLine(lin1[0]);
+                        thermoPort.Write(lin1[0]+"\r\n");
                         response = "";
                         do
                         {

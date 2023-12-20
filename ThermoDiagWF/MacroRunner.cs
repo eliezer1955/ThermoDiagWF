@@ -39,7 +39,7 @@ namespace ThermoDiagWF
             while (currentTime - startTime < period)
             {
                 currentTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
-                thermoPort.WriteLine("/3aR");
+                thermoPort.Write("/3aR\r\n");
                 StringBuilder response1 = new StringBuilder();
                 do
                 {
@@ -141,7 +141,7 @@ namespace ThermoDiagWF
                         do
                         {
                             Int32.Parse(parsedLine[1]);
-                            thermoPort.WriteLine("/Q" + parsedLine[1] + "R");
+                            thermoPort.Write("/Q" + parsedLine[1] + "R\r\n");
                             Thread.Sleep(100);
                             byte c1;
                             do
@@ -164,7 +164,12 @@ namespace ThermoDiagWF
                     if (string.IsNullOrWhiteSpace(parsedLine[0])) //Disregard blanks lines
                         continue;
                     if (parsedLine[1] != null)
+                    {
+                        MessageBoxButtons buttons = MessageBoxButtons.YesNo;
+                        DialogResult result;
+                        result = MessageBox.Show(parsedLine[1], "Stepper Alert!", buttons);
                         continue;
+                    }
                 }
 
                 // Read switches continuously for period of time, update GUI display
@@ -202,7 +207,7 @@ namespace ThermoDiagWF
                 if (!string.IsNullOrWhiteSpace(lin1[0]))
                 {
                     lastCommand = lin1;
-                    thermoPort.WriteLine(lin1[0]);
+                    thermoPort.Write(lin1[0]+"\r\n");
                     StringBuilder response1 = new StringBuilder();
                     do
                     {
@@ -210,7 +215,7 @@ namespace ThermoDiagWF
                         response1.Append((char)RxBuffer);
                         if (RxBuffer == '\n') break;
                     } while (true);
-                    if (lin1[0].StartsWith("/4&R"))
+                    if (lin1[0].StartsWith("/3&R"))
                     {
                         var temps = response1.ToString();
                         temps = temps.Replace("\r", string.Empty);
