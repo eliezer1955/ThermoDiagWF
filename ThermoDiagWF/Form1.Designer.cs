@@ -56,7 +56,7 @@ namespace ThermoDiagWF
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(188, 288);
+            this.button1.Location = new System.Drawing.Point(187, 300);
             this.button1.Margin = new System.Windows.Forms.Padding(4);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(134, 37);
@@ -139,56 +139,57 @@ namespace ThermoDiagWF
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(107, 398);
+            this.label3.Location = new System.Drawing.Point(101, 398);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(84, 25);
+            this.label3.Size = new System.Drawing.Size(107, 25);
             this.label3.TabIndex = 38;
-            this.label3.Text = "Temp 1";
+            this.label3.Text = "Left Block";
+            this.label3.Click += new System.EventHandler(this.label3_Click_1);
             // 
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(263, 398);
+            this.label4.Location = new System.Drawing.Point(234, 398);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(84, 25);
+            this.label4.Size = new System.Drawing.Size(138, 25);
             this.label4.TabIndex = 39;
-            this.label4.Text = "Temp 2";
+            this.label4.Text = "Left Heatsink";
             // 
             // label5
             // 
             this.label5.AutoSize = true;
             this.label5.Location = new System.Drawing.Point(403, 398);
             this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(84, 25);
+            this.label5.Size = new System.Drawing.Size(90, 25);
             this.label5.TabIndex = 40;
-            this.label5.Text = "Temp 3";
+            this.label5.Text = "Ambient";
             // 
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(551, 398);
+            this.label6.Location = new System.Drawing.Point(534, 398);
             this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(84, 25);
+            this.label6.Size = new System.Drawing.Size(121, 25);
             this.label6.TabIndex = 41;
-            this.label6.Text = "Temp 4";
+            this.label6.Text = "Right Block";
             // 
             // label7
             // 
             this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(697, 398);
+            this.label7.Location = new System.Drawing.Point(678, 398);
             this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(84, 25);
+            this.label7.Size = new System.Drawing.Size(152, 25);
             this.label7.TabIndex = 42;
-            this.label7.Text = "Temp 5";
+            this.label7.Text = "Right Heatsink";
             // 
             // label8
             // 
             this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(844, 398);
+            this.label8.Location = new System.Drawing.Point(858, 398);
             this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(84, 25);
+            this.label8.Size = new System.Drawing.Size(73, 25);
             this.label8.TabIndex = 43;
-            this.label8.Text = "Temp 6";
+            this.label8.Text = "Chiller";
             // 
             // Form1
             // 

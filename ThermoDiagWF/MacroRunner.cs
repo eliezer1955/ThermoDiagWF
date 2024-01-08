@@ -13,6 +13,7 @@ namespace ThermoDiagWF
 {
     public class MacroRunner
     {
+        private readonly log4net.ILog _logger = log4net.LogManager.GetLogger(typeof(MacroRunner));
         public string CurrentMacro;
         public SerialPort thermoPort;
         StreamReader fs = null;
@@ -203,6 +204,7 @@ namespace ThermoDiagWF
 
                 //Actual command
                 string[] lin1 = line.Split('#');
+                lin1[0]=lin1[0].TrimEnd(new char[] { ' ','\r','\n', '\t'});
                 lin1[0] = lin1[0].Trim();
                 if (!string.IsNullOrWhiteSpace(lin1[0]))
                 {

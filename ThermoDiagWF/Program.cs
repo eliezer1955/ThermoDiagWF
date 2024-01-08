@@ -13,7 +13,9 @@ namespace ThermoDiagWF
     }
     internal static class Program
     {
-        
+        private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
+
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
@@ -22,6 +24,8 @@ namespace ThermoDiagWF
         
         static void Main()
         {
+            log.Info("Thermo Diag starting!");
+
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault( false );           
             state mystate= new state();
