@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -24,6 +25,8 @@ namespace ThermoDiagWF
         
         static void Main()
         {
+            var configFile = new FileInfo(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "log4net.config"));
+            log4net.Config.XmlConfigurator.Configure(configFile);
             log.Info("Thermo Diag starting!");
 
             Application.EnableVisualStyles();
