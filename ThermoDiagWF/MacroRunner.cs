@@ -20,6 +20,11 @@ namespace ThermoDiagWF
         ThermoController controller = null;
         bool socketMode = false;
         public PipeClient pipeClient = null;
+        private string[] Macro;
+        private int currentline = 0;
+        private System.Collections.Generic.Dictionary<string, int> label = new System.Collections.Generic.Dictionary<string, int>();
+
+
 
         public MacroRunner(ThermoController sc, PipeClient pipeClientin, string filename = null)
         {
@@ -28,8 +33,21 @@ namespace ThermoDiagWF
             pipeClient = pipeClientin;
             controller = sc;
             socketMode = (CurrentMacro == null);
+            int currentline = 0;
             if (CurrentMacro != null)
-                fs = new StreamReader(CurrentMacro);
+            {
+                //Load full macro into memory as array of strings
+                Macro = System.IO.File.ReadAllLines( CurrentMacro );
+                //Scan macro array for labels, record their line number in Dictionary
+                currentline = 0;
+                foreach (string line in Macro)
+                {
+                    string[] line1 = line.Split( '#' ); //Disregard comments
+                    if (line1[0].StartsWith( ":" ))
+                        label.Add( line1[0].Substring( 1 ).TrimEnd( '\r', '\n', ' ', '\t' ), currentline + 1 );
+                    ++currentline;
+                }
+            }
         }
 
 
@@ -83,7 +101,7 @@ namespace ThermoDiagWF
             }
             else
             {
-                s = fs.ReadLine();
+                s = currentline >= Macro.Length ? null : Macro[currentline++];
             }
             return s;
         }
@@ -107,6 +125,7 @@ namespace ThermoDiagWF
                 if (line == null) break;
                 if (line.StartsWith("\0")) continue;
                 if (line.StartsWith("#")) continue;
+                if (line.StartsWith( ":" )) continue;
                 if (string.IsNullOrEmpty(line)) continue;
                 if (string.IsNullOrWhiteSpace(line)) continue;
                 if (line.StartsWith("IFRETURNISNOT")) //conditional execution based on last return
@@ -164,7 +183,25 @@ namespace ThermoDiagWF
                     _logger.Error(value);
                     continue;
                 }
+                if (line.StartsWith( "GOTO" ))
+                {
+                    string value = "";
+                    string[] line1 = line.Split( '#' ); //Disregard comments
+                    string[] parsedLine = line1[0].Split( ',' );
+                    if (string.IsNullOrWhiteSpace( parsedLine[0] )) //Disregard blanks lines
+                        continue;
+                    if (parsedLine[1] != null)
+                        value = parsedLine[1].TrimEnd( '\r', '\n', ' ', '\t' );
+                    if (!label.ContainsKey( value ))
+                        _logger.Error( "Unknown label " + value );
+                    else
+                    {
 
+                        currentline = label[value];
+                        continue;
+                    }
+
+                }
                 // "Nested" macro calling
                 if (line.StartsWith("@"))
                 {
