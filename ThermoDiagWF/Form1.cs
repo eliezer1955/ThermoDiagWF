@@ -17,13 +17,22 @@ namespace ThermoDiagWF
             //System.Diagnostics.Debugger.Launch();   
             InitializeComponent();
             CmdLineArgs = args;
+            if (args[0] != "Slave")
+                CurrentMacro = args[0];
             thermoController = new ThermoController(CurrentMacro, this);
             button3.Text = thermoController.CurrentMacro;
+         
             if (CmdLineArgs.Length > 0)
-            {
-                Thread runner = new Thread(() => thermoController.SocketMode(CmdLineArgs));
-                runner.Start();
-            }
+                if (CmdLineArgs[0] == "Slave")
+                {
+                    Thread runner = new Thread( () => thermoController.SocketMode( CmdLineArgs ) );
+                    runner.Start();
+                }
+                else
+                {
+                    MacroRunner macroRunner = new MacroRunner( thermoController, null, CurrentMacro );
+                    macroRunner.RunMacro();
+                }
         }
 
         private void Form1_Load(object sender, EventArgs e)
