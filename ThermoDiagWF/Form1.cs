@@ -11,26 +11,27 @@ namespace ThermoDiagWF
         ThermoController thermoController;
         public string CurrentMacro = "thermosetup.txt";
         public string[] CmdLineArgs;
+        public bool stopMonitoring = false;
 
         public Form1(string[] args)
         {
             //System.Diagnostics.Debugger.Launch();   
             InitializeComponent();
             CmdLineArgs = args;
-            if (args[0] != "Slave")
-                CurrentMacro = args[0];
+            if (args.Length > 1 && args[1] != "Slave")
+                CurrentMacro = args[1];
             thermoController = new ThermoController(CurrentMacro, this);
             button3.Text = thermoController.CurrentMacro;
-         
-            if (CmdLineArgs.Length > 0)
-                if (CmdLineArgs[0] == "Slave")
+
+            if (CmdLineArgs.Length > 1)
+                if (CmdLineArgs[1] == "Slave")
                 {
-                    Thread runner = new Thread( () => thermoController.SocketMode( CmdLineArgs ) );
+                    Thread runner = new Thread(() => thermoController.SocketMode(CmdLineArgs));
                     runner.Start();
                 }
                 else
                 {
-                    MacroRunner macroRunner = new MacroRunner( thermoController, null, CurrentMacro );
+                    MacroRunner macroRunner = new MacroRunner(thermoController, null, CurrentMacro);
                     macroRunner.RunMacro();
                 }
         }
@@ -228,6 +229,22 @@ namespace ThermoDiagWF
         }
 
         private void label3_Click_1(object sender, EventArgs e)
+        {
+
+        }
+
+        private void button2_Click_1(object sender, EventArgs e)
+        {
+
+        stopMonitoring = true;
+    }
+
+        private void textBox7_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void textBox8_TextChanged(object sender, EventArgs e)
         {
 
         }

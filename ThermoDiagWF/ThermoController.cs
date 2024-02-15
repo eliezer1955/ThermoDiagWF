@@ -16,12 +16,25 @@ using System.Drawing;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 using System.Reflection;
+using CookComputing.XmlRpc;
 
 namespace ThermoDiagWF
 {
-    /// <summary>
-    /// An empty page that can be used on its own or navigated to within a Frame.
-    /// </summary>
+    public struct SumAndDiffValue
+    {
+        public int sum;
+        public int difference;
+    }
+
+    [XmlRpcUrl("http://localhost/sumAndDiff.rem:8000")]
+    public interface ISumAndDiff : IXmlRpcProxy
+    {
+        [XmlRpcMethod]
+       int add(int x, int y);
+       int diff(int x, int y);
+
+
+    }
     public class ThermoController : Object
     {
         public struct CommandStructure
@@ -38,7 +51,7 @@ namespace ThermoDiagWF
         public int LeftRightChoice;
         public SerialPort thermoPort;
         string localFolder;
-        public string CurrentMacro = "E2E.tst.txt";
+        public string CurrentMacro = "ThermoSetup.tst.txt";
         VideoCapture capture;
         public int valve;
         public int valvepos;
@@ -79,8 +92,8 @@ namespace ThermoDiagWF
                 thermoPort.DataBits = 8;
                 thermoPort.StopBits = StopBits.One;
                 thermoPort.Parity = Parity.None;
-                thermoPort.ReadTimeout = 500;
-                thermoPort.WriteTimeout = 500;
+                thermoPort.ReadTimeout = 1500;
+                thermoPort.WriteTimeout = 1500;
                 thermoPort.Open();
             }
             catch (Exception ex)
@@ -97,7 +110,12 @@ namespace ThermoDiagWF
             serialSetup();
             parent = parentIn;
             CurrentMacro = runthis;
-
+            /*
+            ISumAndDiff proxy = XmlRpcProxyGen.Create<ISumAndDiff>();
+            proxy.Timeout = 5000;
+            int ret = proxy.add(2, 3);
+            */
+           
         }
 
         public void MoveValve(int rs485Device, int pos)

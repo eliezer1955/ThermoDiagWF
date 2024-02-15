@@ -31,18 +31,18 @@ namespace ThermoDiagWF
 
 
 
-        public void AddVar( string key, object v ) //storing the ref to a string
+        public void AddVar(string key, object v) //storing the ref to a string
         {
             if (null == v)
             {
                 v = new MyRef<string> { Ref = " " };
             }
-            variables.Add( key, v );
+            variables.Add(key, v);
         }
 
 
 
-        public void changeVar( string key, object newValue ) //changing any of them
+        public void changeVar(string key, object newValue) //changing any of them
         {
             var ref2 = variables[key] as MyRef<string>;
             if (ref2 == null)
@@ -64,39 +64,39 @@ namespace ThermoDiagWF
         private String response;
         private Dictionary<string, object> variables = new Dictionary<string, object>();
 
-        private string ExpandVariables( string instring )
+        private string ExpandVariables(string instring)
         {
             StringBuilder sb = new StringBuilder();
             int start = 0;
             int i;
 
             var val = new MyRef<string> { Ref = "" };
-            for (i = start ; i < instring.Length ; i++)
+            for (i = start; i < instring.Length; i++)
                 if (instring[i] == '%')
-                    for (int j = 1 ; j < instring.Length - i ; j++)
+                    for (int j = 1; j < instring.Length - i; j++)
                         if (instring[i + j] == '%')
                         {
-                            sb.Append( instring.Substring( start, i - start ) );
-                            string key = instring.Substring( i + 1, j - 1 );
-                            if (variables.ContainsKey( key ))
+                            sb.Append(instring.Substring(start, i - start));
+                            string key = instring.Substring(i + 1, j - 1);
+                            if (variables.ContainsKey(key))
                             {
                                 val = (MyRef<string>)variables[key];
-                                sb.Append( val.Ref );
+                                sb.Append(val.Ref);
                                 start = i = i + j + 1;
                             }
-                            else _logger.Error( "Unknown variable:" + val );
+                            else _logger.Error("Unknown variable:" + val);
                             continue;
                         }
             if ((i - start > 0) && (start < instring.Length))
-                sb.Append( instring.Substring( start, i - start ) );
+                sb.Append(instring.Substring(start, i - start));
             return sb.ToString();
         }
 
-        private string Evaluate( string instring )
+        private string Evaluate(string instring)
         {
-            instring = ExpandVariables( instring );
+            instring = ExpandVariables(instring);
             DataTable dt = new DataTable();
-            var v = dt.Compute( instring, "" );
+            var v = dt.Compute(instring, "");
             return v.ToString();
         }
 
@@ -111,17 +111,65 @@ namespace ThermoDiagWF
             if (CurrentMacro != null)
             {
                 //Load full macro into memory as array of strings
-                Macro = System.IO.File.ReadAllLines( CurrentMacro );
+                Macro = System.IO.File.ReadAllLines(CurrentMacro);
                 //Scan macro array for labels, record their line number in Dictionary
                 currentline = 0;
                 foreach (string line in Macro)
                 {
-                    string[] line1 = line.Split( '#' ); //Disregard comments
-                    if (line1[0].StartsWith( ":" ))
-                        label.Add( line1[0].Substring( 1 ).TrimEnd( '\r', '\n', ' ', '\t' ), currentline + 1 );
+                    string[] line1 = line.Split('#'); //Disregard comments
+                    if (line1[0].StartsWith(":"))
+                        label.Add(line1[0].Substring(1).TrimEnd('\r', '\n', ' ', '\t'), currentline + 1);
                     ++currentline;
                 }
             }
+        }
+
+        string[] sendCmd(string tosend)
+        {
+            thermoPort.Write("/3" + tosend + "R\r\n");
+            StringBuilder response1 = new StringBuilder();
+            do
+            {
+                int RxBuffer = thermoPort.ReadByte();
+                response1.Append((char)RxBuffer);
+                if (RxBuffer == '\n') break;
+            } while (true);
+            var temps = response1.ToString();
+            temps = temps.Substring(3).Trim();
+            temps = temps.Replace("\r", string.Empty);
+            temps = temps.Replace("\n", string.Empty);
+            temps = temps.Replace("\u0003", string.Empty);
+            var tempa = temps.Split(' ');
+            return tempa;
+        }
+
+        public void GetIRs()
+        {
+            var tempa = sendCmd("`0"); //select IR channel 0
+            tempa = sendCmd("^");
+            var tempb = sendCmd("`1"); //select IR channel 1
+            tempb = sendCmd("^");
+            controller.SetControlPropertyThreadSafe(controller.parent.textBox7, "Text", tempa[0]);
+            controller.SetControlPropertyThreadSafe(controller.parent.textBox8, "Text", tempb[0]);
+            controller.parent.Update();
+            Application.DoEvents();
+
+        }
+
+        public void GetTemps()
+        {
+
+            var tempa = sendCmd("a");
+            controller.SetControlPropertyThreadSafe(controller.parent.textBox1, "Text", tempa[0]);
+            controller.SetControlPropertyThreadSafe(controller.parent.textBox2, "Text", tempa[1]);
+            controller.SetControlPropertyThreadSafe(controller.parent.textBox3, "Text", tempa[2]);
+            controller.SetControlPropertyThreadSafe(controller.parent.textBox4, "Text", tempa[3]);
+            controller.SetControlPropertyThreadSafe(controller.parent.textBox5, "Text", tempa[4]);
+            controller.SetControlPropertyThreadSafe(controller.parent.textBox6, "Text", tempa[5]);
+            GetIRs();
+            controller.parent.Update();
+            Application.DoEvents();
+
         }
 
 
@@ -132,28 +180,12 @@ namespace ThermoDiagWF
             while (currentTime - startTime < period)
             {
                 currentTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
-                thermoPort.Write("/3aR\r\n");
-                StringBuilder response1 = new StringBuilder();
-                do
+                GetTemps();
+                if (controller.parent.stopMonitoring)
                 {
-                    int RxBuffer = thermoPort.ReadByte();
-                    response1.Append((char)RxBuffer);
-                    if (RxBuffer == '\n') break;
-                } while (true);
-                var temps = response1.ToString();
-                temps = temps.Substring(3).Trim();
-                temps = temps.Replace("\r", string.Empty);
-                temps = temps.Replace("\n", string.Empty);
-                temps = temps.Replace("\u0003", string.Empty);
-                var tempa = temps.Split(' ');
-                controller.SetControlPropertyThreadSafe(controller.parent.textBox1, "Text", tempa[0]);
-                controller.SetControlPropertyThreadSafe(controller.parent.textBox2, "Text", tempa[1]);
-                controller.SetControlPropertyThreadSafe(controller.parent.textBox3, "Text", tempa[2]);
-                controller.SetControlPropertyThreadSafe(controller.parent.textBox4, "Text", tempa[3]);
-                controller.SetControlPropertyThreadSafe(controller.parent.textBox5, "Text", tempa[4]);
-                controller.SetControlPropertyThreadSafe(controller.parent.textBox6, "Text", tempa[5]);
-                controller.parent.Update();
-                Thread.Yield();
+                    controller.parent.stopMonitoring = false;
+                    break;
+                }
             }
 
             return period;
@@ -195,149 +227,149 @@ namespace ThermoDiagWF
             while (true)
             {
                 line = await readLine();
-
+                GetTemps();
                 if (line == null) break;
                 if (line.StartsWith("\0")) continue;
                 if (line.StartsWith("#")) continue;
-                if (line.StartsWith( ":" )) continue;
+                if (line.StartsWith(":")) continue;
                 if (string.IsNullOrEmpty(line)) continue;
                 if (string.IsNullOrWhiteSpace(line)) continue;
-                if (line.StartsWith( "END" )) //Terminate program
+                if (line.StartsWith("END")) //Terminate program
                 {
                     string expr = "";
-                    string[] line1 = line.Split( '#' ); //Disregard comments
-                    string[] parsedLine = line1[0].Split( ',' );
-                    if (string.IsNullOrWhiteSpace( parsedLine[0] )) //Disregard blanks lines
+                    string[] line1 = line.Split('#'); //Disregard comments
+                    string[] parsedLine = line1[0].Split(',');
+                    if (string.IsNullOrWhiteSpace(parsedLine[0])) //Disregard blanks lines
                         continue;
                     if (parsedLine[1] != null)
                         expr = parsedLine[1]; //isolate expression
-                    Environment.Exit( Int32.Parse( Evaluate( expr ) ) );
+                    Environment.Exit(Int32.Parse(Evaluate(expr)));
                 }
-                if (line.StartsWith( "IFRETURNISNOT" )) //conditional execution based on last return
+                if (line.StartsWith("IFRETURNISNOT")) //conditional execution based on last return
                 {
                     string value = "";
                     string expr = "";
-                    string[] line1 = line.Split( '#' ); //Disregard comments
-                    string[] parsedLine = line1[0].Split( ',' );
-                    if (string.IsNullOrWhiteSpace( parsedLine[0] )) //Disregard blanks lines
+                    string[] line1 = line.Split('#'); //Disregard comments
+                    string[] parsedLine = line1[0].Split(',');
+                    if (string.IsNullOrWhiteSpace(parsedLine[0])) //Disregard blanks lines
                         continue;
                     if (parsedLine[1] != null)
                         expr = parsedLine[1]; //isolate expression
                     if (parsedLine[2] != null)
                         value = parsedLine[2]; //isolate target value
-                    value = Evaluate( value );
-                    expr = Evaluate( expr );
+                    value = Evaluate(value);
+                    expr = Evaluate(expr);
 
                     if (value == expr) //last return matches value
                         continue; //do nothing, go to read next command
                                   //value is not equal to last response, execute conditional command
                     line = ""; //reassemble rest of conditional command
-                    for (int i = 3 ; i < parsedLine.Length ; i++)
+                    for (int i = 3; i < parsedLine.Length; i++)
                     {
                         line += parsedLine[i];
                         if (i < parsedLine.Length - 1) line += ",";
                     }
                     //continue execution as if it was non-conditional
                 }
-                if (line.StartsWith( "IFRETURNIS" )) //conditional execution based on last return
+                if (line.StartsWith("IFRETURNIS")) //conditional execution based on last return
                 {
                     string value = "";
                     string expr = "";
-                    string[] line1 = line.Split( '#' ); //Disregard comments
-                    string[] parsedLine = line1[0].Split( ',' );
-                    if (string.IsNullOrWhiteSpace( parsedLine[0] )) //Disregard blanks lines
+                    string[] line1 = line.Split('#'); //Disregard comments
+                    string[] parsedLine = line1[0].Split(',');
+                    if (string.IsNullOrWhiteSpace(parsedLine[0])) //Disregard blanks lines
                         continue;
                     if (parsedLine[1] != null)
                         expr = parsedLine[1]; //isolate expression
                     if (parsedLine[2] != null)
                         value = parsedLine[2]; //isolate target value
-                    value = Evaluate( value );
-                    expr = Evaluate( expr );
-                    if (value != Evaluate( expr )) //last return does not match value
+                    value = Evaluate(value);
+                    expr = Evaluate(expr);
+                    if (value != Evaluate(expr)) //last return does not match value
                         continue; //do nothing, go to read next command
                                   //value is equal to last response
                     line = ""; //reassemble rest of command
-                    for (int i = 3 ; i < parsedLine.Length ; i++)
+                    for (int i = 3; i < parsedLine.Length; i++)
                     {
                         line += parsedLine[i];
                         if (i < parsedLine.Length - 1) line += ",";
                     }
                     //continue execution as if it was non-conditional
                 }
-                if (line.StartsWith( "EVALUATE" )) //Set response to evaluation of expression
+                if (line.StartsWith("EVALUATE")) //Set response to evaluation of expression
                 {
                     string value = "";
-                    string[] line1 = line.Split( '#' ); //Disregard comments
-                    string[] parsedLine = line1[0].Split( ',' );
-                    if (string.IsNullOrWhiteSpace( parsedLine[0] )) //Disregard blanks lines
+                    string[] line1 = line.Split('#'); //Disregard comments
+                    string[] parsedLine = line1[0].Split(',');
+                    if (string.IsNullOrWhiteSpace(parsedLine[0])) //Disregard blanks lines
                         continue;
                     if (parsedLine[1] != null)
                         value = parsedLine[1]; //isolate target value
 
-                    response = Evaluate( parsedLine[1] );
-                    changeVar( "response", response );
+                    response = Evaluate(parsedLine[1]);
+                    changeVar("response", response);
                     continue;
 
                 }
-                if (line.StartsWith( "SET" )) //set value of global var; create it if needed
+                if (line.StartsWith("SET")) //set value of global var; create it if needed
                 {
                     string variable = "";
                     string value = "";
-                    string[] line1 = line.Split( '#' ); //Disregard comments
-                    string[] parsedLine = line1[0].Split( ',' );
-                    if (string.IsNullOrWhiteSpace( parsedLine[0] )) //Disregard blanks lines
+                    string[] line1 = line.Split('#'); //Disregard comments
+                    string[] parsedLine = line1[0].Split(',');
+                    if (string.IsNullOrWhiteSpace(parsedLine[0])) //Disregard blanks lines
                         continue;
                     if (parsedLine[1] != null)
                         variable = parsedLine[1];
                     if (parsedLine[2] != null)
-                        value = Evaluate( parsedLine[2] );
-                    if (!variables.ContainsKey( variable ))
-                        AddVar( variable, null );
-                    changeVar( variable, value );
+                        value = Evaluate(parsedLine[2]);
+                    if (!variables.ContainsKey(variable))
+                        AddVar(variable, null);
+                    changeVar(variable, value);
                     continue;
                 }
-                if (line.StartsWith( "EXIT" )) //stop macro
+                if (line.StartsWith("EXIT")) //stop macro
                 {
                     break;
                 }
-                if (line.StartsWith( "EXECUTE" )) //stop macro
+                if (line.StartsWith("EXECUTE")) //stop macro
                 {
                     string value = "";
 
-                    string[] line1 = line.Split( '#' ); //Disregard comments
-                    string[] parsedLine = line1[0].Split( ',' );
-                    if (string.IsNullOrWhiteSpace( parsedLine[0] )) //Disregard blanks lines
+                    string[] line1 = line.Split('#'); //Disregard comments
+                    string[] parsedLine = line1[0].Split(',');
+                    if (string.IsNullOrWhiteSpace(parsedLine[0])) //Disregard blanks lines
                         continue;
                     if (parsedLine[1] != null)
                         value = parsedLine[1];
-                    System.Diagnostics.Process.Start( "CMD.exe", "/C " + value );
+                    System.Diagnostics.Process.Start("CMD.exe", "/C " + value);
                     continue;
                 }
 
-                if (line.StartsWith( "LOGERROR" )) //write log entry
+                if (line.StartsWith("LOGERROR")) //write log entry
                 {
                     string value = "";
-                    string[] line1 = line.Split( '#' ); //Disregard comments
-                    string[] parsedLine = line1[0].Split( ',' );
-                    if (string.IsNullOrWhiteSpace( parsedLine[0] )) //Disregard blanks lines
+                    string[] line1 = line.Split('#'); //Disregard comments
+                    string[] parsedLine = line1[0].Split(',');
+                    if (string.IsNullOrWhiteSpace(parsedLine[0])) //Disregard blanks lines
                         continue;
                     if (parsedLine[1] != null)
-                        value = ExpandVariables( parsedLine[1] );
+                        value = ExpandVariables(parsedLine[1]);
 
-                    _logger.Error( value );
+                    _logger.Error(value);
                     continue;
                 }
-                if (line.StartsWith( "GOTO" ))
+                if (line.StartsWith("GOTO"))
                 {
                     string value = "";
-                    string[] line1 = line.Split( '#' ); //Disregard comments
-                    string[] parsedLine = line1[0].Split( ',' );
-                    if (string.IsNullOrWhiteSpace( parsedLine[0] )) //Disregard blanks lines
+                    string[] line1 = line.Split('#'); //Disregard comments
+                    string[] parsedLine = line1[0].Split(',');
+                    if (string.IsNullOrWhiteSpace(parsedLine[0])) //Disregard blanks lines
                         continue;
                     if (parsedLine[1] != null)
-                        value = parsedLine[1].TrimEnd( '\r', '\n', ' ', '\t' );
-                    if (!label.ContainsKey( value ))
-                        _logger.Error( "Unknown label " + value );
+                        value = parsedLine[1].TrimEnd('\r', '\n', ' ', '\t');
+                    if (!label.ContainsKey(value))
+                        _logger.Error("Unknown label " + value);
                     else
                     {
 
@@ -405,7 +437,7 @@ namespace ThermoDiagWF
                     {
                         MessageBoxButtons buttons = MessageBoxButtons.YesNo;
                         DialogResult result;
-                        result = MessageBox.Show(parsedLine[1], "Stepper Alert!", buttons);
+                        result = MessageBox.Show(parsedLine[1], "Thermo Alert!", buttons);
                         response = result.ToString();
                         continue;
                     }
@@ -463,6 +495,8 @@ namespace ThermoDiagWF
                         temps = temps.Replace("\u0003", string.Empty);
                         controller.parent.label1.Text = temps.Substring(3).Trim();
                     }
+                    changeVar("response", response1);
+                    response = response1.ToString();
                 }
 
 
