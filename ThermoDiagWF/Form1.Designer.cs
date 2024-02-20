@@ -60,6 +60,7 @@ namespace ThermoDiagWF
             this.textBox9 = new System.Windows.Forms.TextBox();
             this.label11 = new System.Windows.Forms.Label();
             this.textBox10 = new System.Windows.Forms.TextBox();
+            this.label12 = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // button1
@@ -269,11 +270,25 @@ namespace ThermoDiagWF
             this.textBox10.TabIndex = 51;
             this.textBox10.TextChanged += new System.EventHandler(this.textBox10_TextChanged);
             // 
+            // label12
+            // 
+            this.label12.AutoSize = true;
+            this.label12.BackColor = System.Drawing.SystemColors.ControlDarkDark;
+            this.label12.ForeColor = System.Drawing.Color.Yellow;
+            this.label12.Location = new System.Drawing.Point(417, 559);
+            this.label12.Name = "label12";
+            this.label12.Size = new System.Drawing.Size(246, 25);
+            this.label12.TabIndex = 52;
+            this.label12.Text = "ThermoTest in progress!";
+            this.label12.Visible = false;
+            this.label12.Click += new System.EventHandler(this.label12_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(12F, 25F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1200, 806);
+            this.Controls.Add(this.label12);
             this.Controls.Add(this.textBox10);
             this.Controls.Add(this.textBox9);
             this.Controls.Add(this.label11);
@@ -325,7 +340,7 @@ namespace ThermoDiagWF
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.Label label8;
-        private System.Windows.Forms.Button button2;
+        public System.Windows.Forms.Button button2;
         private System.Windows.Forms.Label label9;
         public System.Windows.Forms.TextBox textBox7;
         public System.Windows.Forms.TextBox textBox8;
@@ -333,6 +348,7 @@ namespace ThermoDiagWF
         public System.Windows.Forms.TextBox textBox9;
         private System.Windows.Forms.Label label11;
         public System.Windows.Forms.TextBox textBox10;
+        public System.Windows.Forms.Label label12;
     }
 }
 

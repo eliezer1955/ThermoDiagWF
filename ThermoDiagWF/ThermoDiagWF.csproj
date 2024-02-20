@@ -134,7 +134,13 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="PlotThermoTest.py">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="ThermoSetup.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ThermoTest.tst.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

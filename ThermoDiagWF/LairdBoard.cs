@@ -5,6 +5,7 @@ using System.IO;
 using System.IO.Ports;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -14,21 +15,17 @@ namespace ThermoDiagWF
     {
         private Dictionary<string, string> ports;
         public string  portName = null;
-        public SerialPort thermoPort;
+        public SerialPort thermoPort=new SerialPort();
 
-        private bool notin(string n)
-        {
-            return !(ports.ContainsKey(n));
-        }
 
         public LairdBoard()
         {
             string text = File.ReadAllText(@"C:\\ProgramData\LabScript\\Data\\comports.json");
             ports = JsonConvert.DeserializeObject<Dictionary<string, string>>(text);
             string[] portsNow = SerialPort.GetPortNames();
-            string[] portsFiltered = Array.FindAll(portsNow, notin); //isolate all com ports NOT in json dictionary
-            foreach (string p in portsFiltered)
+            foreach (string p in portsNow) //find port not in ports (Json file)
             {
+                if (ports.ContainsValue(p)) continue;
                 try
                 {
                     thermoPort.PortName = p;
@@ -40,8 +37,10 @@ namespace ThermoDiagWF
                     thermoPort.WriteTimeout = 1500;
                     thermoPort.Open();
                     thermoPort.Write("$v\r\n");
+                    Thread.Sleep(5);
                     string response = thermoPort.ReadLine();
-                    if (response.Contains("Laird"))
+                    response = thermoPort.ReadLine();
+                    if (response.Contains("SC_v"))
                     {
                         portName = p;
                         break;
@@ -49,31 +48,41 @@ namespace ThermoDiagWF
                     else
                     {
                         thermoPort.Close();
-                        thermoPort = null;
+                        portName = null;
                     }
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show(thermoPort + " Exception: " + ex.Message);
+                    thermoPort.Close();
+                    portName = null;
                 }
 
             }
-            thermoPort.Write("$A2\r\n");
-            try
+            if (thermoPort.IsOpen)
             {
-                while (thermoPort.ReadLine()!=null);
-            }
-            catch(Exception ex) //wait for timeout
-            {
+                thermoPort.Write("$A0\r\n");
+                Thread.Sleep(5);
+                try
+                {
+                    while (thermoPort.ReadLine() != null)
+                        thermoPort.ReadLine();
+                }
+                catch (Exception ex) //wait for timeout
+                {
 
+                }
             }
+            else
+                portName = null;
         }
 
-        string ReadTemp()
+        public string ReadTemp()
         {
-            if (thermoPort.PortName == null) return "";
+            if (portName == null) return "";
             thermoPort.Write("$R100?\r\n");
+            Thread.Sleep(5);
             string response = thermoPort.ReadLine();
+            response = thermoPort.ReadLine();
             response = response.Trim();
             response = response.TrimEnd('\n','\r' );
             return response;
