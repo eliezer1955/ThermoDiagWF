@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.002.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ThermoDiagWF", "ThermoDiagWF.csproj", "{13F39FE1-47E9-4AB8-9B24-5E0F21F089FD}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{13F39FE1-47E9-4AB8-9B24-5E0F21F089FD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{13F39FE1-47E9-4AB8-9B24-5E0F21F089FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{13F39FE1-47E9-4AB8-9B24-5E0F21F089FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{13F39FE1-47E9-4AB8-9B24-5E0F21F089FD}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {0B75ED6E-1FAC-422D-AFCD-AD2DB5465520}
+	EndGlobalSection
+EndGlobal

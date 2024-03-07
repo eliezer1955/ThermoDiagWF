@@ -1,3 +1,4 @@
+STATUS,Programming thermistor coefficients + control channels
 /4&R     #get FW version
 /4X0R    #select thermistor 0
 /4DR     #Use full SH model
@@ -13,6 +14,7 @@
 /4DR     #Use full SH model
 /4N0R    #select channel 1
 /4X0R    #select thermistor 0
+/4P
 /4L0.00113794692R #set TrCoeffA for thermistor 0
 /4M0.000232689429R #set TrCoeffB for thermistor 0
 /4O0.000000093330511R #set TrCoeffC for thermistor 0
@@ -41,8 +43,9 @@
 /4N0R    #select channel 1 (chiller)
 /4t3R    #set temp to 3C
 /4ER     #save to EEPROM
-/4ZR    #start controlling
-ALERT,Turning fan off
+:again
+STATUS,Configuration saved to EEPROM: now testing fan control
+#ALERT,Turning fan off
 /4F0R    #select fan 1
 /4V2500R
 /4P0R  #set  power for fan 1
@@ -52,31 +55,36 @@ ALERT,Turning fan off
 /4P0R
 /4V2500R
 :FANON
-ALERT,Turning fan 1 on
+#LERT,Turning fan 1 on
 /4F0R
 /4P255R
-MONITORTEMPS,100000
-ALERT,Turning fan 2 on
+STATUS,Fan 1 on, monitoring temperatures
+MONITORTEMPS,10000
+#ALERT,Turning fan 2 on
+STATUS,Fan 1 on, monitoring temperatures
 /4F1R
 /4P255R
-MONITORTEMPS,100000
-/4F2R
-ALERT,Turning fan 3 on
+MONITORTEMPS,10000
+#ALERT,Turning fan 3 on
+STATUS,Fan 3 on, monitoring temperatures
 /4P255R
-MONITORTEMPS,100000
+MONITORTEMPS,10000
 /4V2500R
 /4ER     #save to EEPROM
 #/4ER     #save to EEPROM
 :MONITOR
-MONITORTEMPS,100000
-ALERT,Turning fan 1 off
+STATUS,all fans on, monitoring temperatures
+MONITORTEMPS,10000
+STATUS,Switching all fans off
+#ALERT,Turning fan 1 off
 /4F0R
 /4P0R
-ALERT,Turning fan 2 off
+#ALERT,Turning fan 2 off
 /4F1R
 /4P0R
-ALERT,Turning fan 3 off
+#ALERT,Turning fan 3 off
 /4F2R
 /4P0R
 /4V2500R
-MONITORTEMPS,1000000
+STATUS,all fans on, monitoring temperatures
+MONITORTEMPS,10000

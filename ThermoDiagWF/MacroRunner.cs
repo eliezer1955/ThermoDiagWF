@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.IO.Ports;
+using System.Linq.Expressions;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
@@ -64,6 +65,7 @@ namespace ThermoDiagWF
         private String response;
         private Dictionary<string, object> variables = new Dictionary<string, object>();
         public LairdBoard laird;
+        public String fluidMeasurement = " ";
 
         private string ExpandVariables(string instring)
         {
@@ -93,12 +95,19 @@ namespace ThermoDiagWF
             return sb.ToString();
         }
 
-        private string Evaluate(string instring)
+        private string Evaluate( string instring )
         {
-            instring = ExpandVariables(instring);
-            DataTable dt = new DataTable();
-            var v = dt.Compute(instring, "");
-            return v.ToString();
+            try
+            {
+                instring = ExpandVariables( instring );
+                DataTable dt = new DataTable();
+                var v = dt.Compute( instring, "" );
+                return v.ToString();
+            }
+            catch (Exception ex)
+            {
+                return instring;
+            }
         }
 
         public MacroRunner(ThermoController sc, PipeClient pipeClientin, string filename = null)
@@ -109,6 +118,7 @@ namespace ThermoDiagWF
             controller = sc;
             socketMode = (CurrentMacro == null);
             AddVar("response", response);
+            AddVar( "fluidMeasurement", fluidMeasurement.ToString() );
             int currentline = 0;
             if (CurrentMacro != null)
             {
@@ -162,7 +172,8 @@ namespace ThermoDiagWF
             controller.SetControlPropertyThreadSafe(controller.parent.textBox8, "Text", tempb[0]);
             if (laird.portName != null)
             {
-                string s = laird.ReadTemp();
+                string s = float.Parse(laird.ReadTemp()).ToString();
+                if (s == "999.99)") s = "";
                 controller.SetControlPropertyThreadSafe(controller.parent.textBox10, "Text", s);
             }
             refreshGUI();
@@ -176,26 +187,32 @@ namespace ThermoDiagWF
 
         private List<string> GetTemps()
         {
-
-            var tempa = sendCmd("a");
-            controller.SetControlPropertyThreadSafe(controller.parent.textBox1, "Text", tempa[0]);
-            controller.SetControlPropertyThreadSafe(controller.parent.textBox2, "Text", tempa[1]);
-            controller.SetControlPropertyThreadSafe(controller.parent.textBox3, "Text", tempa[2]);
-            controller.SetControlPropertyThreadSafe(controller.parent.textBox4, "Text", tempa[3]);
-            controller.SetControlPropertyThreadSafe(controller.parent.textBox5, "Text", tempa[4]);
-            controller.SetControlPropertyThreadSafe(controller.parent.textBox6, "Text", tempa[5]);
+            List<string> temps = new List<string>();
+            try { 
+            var tempa = sendCmd( "a" );
+            controller.SetControlPropertyThreadSafe( controller.parent.textBox1, "Text", tempa[0] );
+            controller.SetControlPropertyThreadSafe( controller.parent.textBox2, "Text", tempa[1] );
+            controller.SetControlPropertyThreadSafe( controller.parent.textBox3, "Text", tempa[2] );
+            controller.SetControlPropertyThreadSafe( controller.parent.textBox4, "Text", tempa[3] );
+            controller.SetControlPropertyThreadSafe( controller.parent.textBox5, "Text", tempa[4] );
+            controller.SetControlPropertyThreadSafe( controller.parent.textBox6, "Text", tempa[5] );
             List<string> tb = GetIRs();
             refreshGUI();
-            List<string> temps = new List<string>();
-            foreach (string s in tempa) temps.Add(s);
-            foreach (string s in tb) temps.Add(s);
-            temps.Add(laird.ReadTemp());
+            
+            foreach (string s in tempa) temps.Add( s );
+            foreach (string s in tb) temps.Add( s );
+            temps.Add( float.Parse(laird.ReadTemp()).ToString() );
             return temps;
+        }
+        catch ( Exception ex ) 
+            {
+                return temps;            
+            }          
 
         }
 
 
-        public long MonitorTemps(long period, long logperiod = -1)
+        public long MonitorTemps(long period, long logperiod = -1, float tempTarget=100000.0F)
         {
             long startTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
             long currentTime = startTime;
@@ -208,6 +225,7 @@ namespace ThermoDiagWF
             {
                 currentTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
                 List<string> tempa = GetTemps();
+                if (tempTarget < 100.0 && float.Parse( tempa[8] ) > tempTarget) break;
                 if (logperiod > 0) //log to logfile
                 {
                     if (currentTime - lastlog > logperiod)
@@ -229,7 +247,7 @@ namespace ThermoDiagWF
                     break;
                 }
             }
-            this.controller.SetControlPropertyThreadSafe(controller.parent.button2, "Visible", true);
+            this.controller.SetControlPropertyThreadSafe(controller.parent.button2, "Visible", false);
             refreshGUI();
             if (logperiod > 0)
                 _logger.Info("Temperature monitoring completed");
@@ -491,9 +509,13 @@ namespace ThermoDiagWF
                 // Read switches continuously for period of time, update GUI display
                 if (line.StartsWith("MONITORTEMPS"))
                 {
+                    long logperiod = -1;
+                    float tempTarget = 100000.0F;
                     string[] line1 = line.Split('#'); //Disregard comments
                     string[] parsedLine = line1[0].Split(',');
-                    MonitorTemps(long.Parse(parsedLine[1]));
+                    if (parsedLine.Length > 2) logperiod = long.Parse( parsedLine[2] );
+                    if (parsedLine.Length > 3) tempTarget = float.Parse( parsedLine[3] );
+                    MonitorTemps(long.Parse(parsedLine[1]), logperiod, tempTarget);
                     continue;
                 }
                 // Read switches continuously for period of time, update GUI display, log results
@@ -506,6 +528,20 @@ namespace ThermoDiagWF
                     MonitorTemps(long.Parse(parsedLine[1]),
                         long.Parse(parsedLine[2]));
                     this.controller.SetControlPropertyThreadSafe(controller.parent.label12, "Visible", false);
+                    refreshGUI();
+                    continue;
+                }
+                // PRINT STATUS ON gui
+                if (line.StartsWith( "STATUS" ))
+                {
+                    string status = "";
+                    string[] line1 = line.Split( '#' ); //Disregard comments
+                    string[] parsedLine = line1[0].Split( ',' );
+                    if (string.IsNullOrWhiteSpace( parsedLine[0] )) //Disregard blanks lines
+                        continue;
+                    if (parsedLine[1] != null)
+                        status = parsedLine[1];
+                    controller.SetControlPropertyThreadSafe( controller.parent.textBox11, "Text", status );
                     refreshGUI();
                     continue;
                 }

@@ -77,8 +77,8 @@ namespace ThermoDiagWF
         }
 
         public string ReadTemp()
-        {
-            if (portName == null) return "";
+        { 
+            if (portName == null) return "999.99";
             thermoPort.Write("$R100?\r\n");
             Thread.Sleep(5);
             string response = thermoPort.ReadLine();

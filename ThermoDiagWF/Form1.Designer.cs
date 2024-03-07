@@ -61,6 +61,8 @@ namespace ThermoDiagWF
             this.label11 = new System.Windows.Forms.Label();
             this.textBox10 = new System.Windows.Forms.TextBox();
             this.label12 = new System.Windows.Forms.Label();
+            this.label13 = new System.Windows.Forms.Label();
+            this.textBox11 = new System.Windows.Forms.TextBox();
             this.SuspendLayout();
             // 
             // button1
@@ -256,11 +258,11 @@ namespace ThermoDiagWF
             // label11
             // 
             this.label11.AutoSize = true;
-            this.label11.Location = new System.Drawing.Point(192, 657);
+            this.label11.Location = new System.Drawing.Point(152, 657);
             this.label11.Name = "label11";
-            this.label11.Size = new System.Drawing.Size(91, 25);
+            this.label11.Size = new System.Drawing.Size(159, 25);
             this.label11.TabIndex = 49;
-            this.label11.Text = "External";
+            this.label11.Text = "External (Laird)";
             // 
             // textBox10
             // 
@@ -283,11 +285,30 @@ namespace ThermoDiagWF
             this.label12.Visible = false;
             this.label12.Click += new System.EventHandler(this.label12_Click);
             // 
+            // label13
+            // 
+            this.label13.AutoSize = true;
+            this.label13.Location = new System.Drawing.Point(0, 0);
+            this.label13.Name = "label13";
+            this.label13.Size = new System.Drawing.Size(79, 25);
+            this.label13.TabIndex = 53;
+            this.label13.Text = "Status:";
+            // 
+            // textBox11
+            // 
+            this.textBox11.Location = new System.Drawing.Point(87, -3);
+            this.textBox11.Name = "textBox11";
+            this.textBox11.Size = new System.Drawing.Size(1101, 31);
+            this.textBox11.TabIndex = 54;
+            this.textBox11.TextChanged += new System.EventHandler(this.textBox11_TextChanged);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(12F, 25F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1200, 806);
+            this.Controls.Add(this.textBox11);
+            this.Controls.Add(this.label13);
             this.Controls.Add(this.label12);
             this.Controls.Add(this.textBox10);
             this.Controls.Add(this.textBox9);
@@ -349,6 +370,8 @@ namespace ThermoDiagWF
         private System.Windows.Forms.Label label11;
         public System.Windows.Forms.TextBox textBox10;
         public System.Windows.Forms.Label label12;
+        private System.Windows.Forms.Label label13;
+        public System.Windows.Forms.TextBox textBox11;
     }
 }
 
