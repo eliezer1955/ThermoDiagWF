@@ -4,6 +4,7 @@ import sys
 from datetime import datetime
 from matplotlib.offsetbox import (TextArea, DrawingArea, OffsetImage,
                                   AnnotationBbox)
+import json
 
 
 def myfloat(s):
@@ -125,3 +126,26 @@ ax.add_artist(ab)
 plt.savefig(fname, format="png", bbox_inches='tight')
 
 plt.show()
+
+
+'''
+# open
+with open('original.json', 'r') as file:
+
+    # read
+    data = json.load(file)
+    
+    # add
+    data["abc"]["mno"] = 3
+
+    # remove
+    data.pop("jkl")
+
+    newData = json.dumps(data, indent=4)
+
+# open
+with open('modified.json', 'w') as file:
+
+    # write
+    file.write(newData)
+'''

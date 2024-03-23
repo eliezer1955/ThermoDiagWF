@@ -15,6 +15,7 @@ namespace ThermoDiagWF
 
 
 
+
         /// <summary>
         /// Clean up any resources being used.
         /// </summary>
@@ -63,6 +64,7 @@ namespace ThermoDiagWF
             this.label12 = new System.Windows.Forms.Label();
             this.label13 = new System.Windows.Forms.Label();
             this.textBox11 = new System.Windows.Forms.TextBox();
+            this.textBox14 = new System.Windows.Forms.TextBox();
             this.SuspendLayout();
             // 
             // button1
@@ -132,6 +134,7 @@ namespace ThermoDiagWF
             this.textBox4.Name = "textBox4";
             this.textBox4.Size = new System.Drawing.Size(121, 31);
             this.textBox4.TabIndex = 35;
+            this.textBox4.TextChanged += new System.EventHandler(this.textBox4_TextChanged);
             // 
             // textBox5
             // 
@@ -207,7 +210,7 @@ namespace ThermoDiagWF
             this.button2.BackColor = System.Drawing.Color.Crimson;
             this.button2.Location = new System.Drawing.Point(471, 639);
             this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(163, 93);
+            this.button2.Size = new System.Drawing.Size(163, 104);
             this.button2.TabIndex = 44;
             this.button2.Text = "Stop Monitoring";
             this.button2.UseVisualStyleBackColor = false;
@@ -302,11 +305,20 @@ namespace ThermoDiagWF
             this.textBox11.TabIndex = 54;
             this.textBox11.TextChanged += new System.EventHandler(this.textBox11_TextChanged);
             // 
+            // textBox14
+            // 
+            this.textBox14.Location = new System.Drawing.Point(471, 740);
+            this.textBox14.Name = "textBox14";
+            this.textBox14.Size = new System.Drawing.Size(167, 31);
+            this.textBox14.TabIndex = 57;
+            this.textBox14.TextChanged += new System.EventHandler(this.textBox14_TextChanged);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(12F, 25F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1200, 806);
+            this.Controls.Add(this.textBox14);
             this.Controls.Add(this.textBox11);
             this.Controls.Add(this.label13);
             this.Controls.Add(this.label12);
@@ -372,6 +384,7 @@ namespace ThermoDiagWF
         public System.Windows.Forms.Label label12;
         private System.Windows.Forms.Label label13;
         public System.Windows.Forms.TextBox textBox11;
+        public System.Windows.Forms.TextBox textBox14;
     }
 }
 

@@ -1,0 +1,95 @@
+﻿/4&R     #get FW version
+/3&R     #get FW version
+
+STATUS,Fan control tests
+/4F1R#select fan 2	
+/4P255R#Turn fan on
+/4F0R#select fan 1	
+/4P255R#Turn fan on
+/4F2R#select fan 2	
+/4P255R#Turn fan on
+
+ALERT,Are all fans running?
+
+/4F1R#select fan 2	
+/4P0R#Turn fan on
+/4F0R#select fan 1	
+/4P0R#Turn fan on
+/4F2R#select fan 2	
+/4P0R#Turn fan on
+
+ALERT,Are all fans off?
+
+/4F1R#select fan 2	
+/4P255R#Turn fan on
+/4F0R#select fan 1	
+/4P255R#Turn fan on
+/4F2R#select fan 2	
+/4P255R#Turn fan on
+
+STATUS,Start chiller cooldown
+/4N0R#select channel 3
+/4U5R#select thermistor 6 for channel 3
+/4t2R#set temp to 2C
+/4W255R#go full power
+/4ZR    #start controlling
+
+STATUS,Ramp up left bay
+LOGERROR, Left Ramp up
+
+/4N1R#select channel 1
+/4U0R#select thermistor 0 for channel 1
+/4t58R#set temp to 58C
+STATUS,Heating left block 
+/4W255R#go full power
+/4ZR    #start controlling
+GETTEMP,1
+MONITORTEMPS,300000,1,%response%+25,0 #monitor temps while logging
+
+LOGERROR, Left Ramp down
+STATUS,Ramp down left bay
+/4t2R#set temp to 2C
+STATUS,Cooling left block to 4C
+/4W255R#go full power
+/4ZR    #start controlling
+MONITORTEMPS,900000,1,-4,0 #monitor temps while logging
+/4xR#stop controlling
+/4W0R#go zero power
+
+STATUS, Ramp up right bay
+LOGERROR, Right  Ramp up
+/4N2R#select channel 2
+/4U3R#select thermistor 3 for channel 2
+/4t58R#set temp to 58C
+STATUS,Heating right block 
+/4W255R#go full power
+/4ZR    #start controlling
+GETTEMP,4
+MONITORTEMPS,300000,1,%response%+25,3 #monitor temps while logging
+
+STATUS,Ramp down right bay
+LOGERROR, Right  Ramp down
+/4t2R#set temp to 2C
+STATUS,Cooling right block to 4C 
+/4W255R#go full power
+/4ZR    #start controlling
+MONITORTEMPS,900000,1,-4,3 #monitor temps while logging
+ALERT,Turning controller/fan off
+/4xR#stop controlling
+/4P3R#Turn fan off
+/4W0R#go zero power
+
+STATUS,Ramp down chiller
+/4N0R#select channel 3
+/4U5R#select thermistor 6 for channel 3
+/4t2R#set temp to 2C
+STATUS,Cooling chiller to 4C 
+/4W255R#go full power
+/4ZR    #start controlling
+MONITORTEMPS,2100000,1,-2,5 #monitor temps while logging
+ALERT,Turning controller/fan off
+/4xR#stop controlling
+/4P3R#Turn fan off
+
+EXECUTE,python PlotThermoRampTest.py %serialNumber% 
+

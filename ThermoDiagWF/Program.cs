@@ -21,18 +21,25 @@ namespace ThermoDiagWF
         /// The main entry point for the application.
         /// </summary>
         [STAThread]
-        
-        
-        static void Main()
+
+
+        static void Main( string[] args )
         {
+            ComPortMap cm;
+            cm = new ComPortMap();
             var configFile = new FileInfo(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "log4net.config"));
             log4net.Config.XmlConfigurator.Configure(configFile);
-            log.Info("Thermo Diag starting!");
+            string serialNumber = cm.GetComPort( "SerialNumber" );
+            log.Info( "SN" + serialNumber + " Thermo Diag is starting..." );
 
             Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault( false );           
+            Application.SetCompatibleTextRenderingDefault( false );
+            var myform = new Form1( args );
+            myform.CmdLineArgs = args;
+            myform.serialNumber = serialNumber;
+ 
             state mystate= new state();
-            Application.Run( new Form1( mystate.args ) );
+            Application.Run( myform );
         }
     }
 }

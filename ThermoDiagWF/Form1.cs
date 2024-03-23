@@ -12,6 +12,7 @@ namespace ThermoDiagWF
         public string CurrentMacro = "thermosetup.txt";
         public string[] CmdLineArgs;
         public bool stopMonitoring = false;
+        public string serialNumber;
 
         public Form1(string[] args)
         {
@@ -265,6 +266,21 @@ namespace ThermoDiagWF
         }
 
         private void textBox11_TextChanged( object sender, EventArgs e )
+        {
+
+        }
+
+        private void textBox14_TextChanged( object sender, EventArgs e )
+        {
+
+        }
+
+        private void textBox4_TextChanged( object sender, EventArgs e )
+        {
+
+        }
+
+        private void textBox13_TextChanged( object sender, EventArgs e )
         {
 
         }

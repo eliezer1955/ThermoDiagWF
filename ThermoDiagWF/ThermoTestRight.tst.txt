@@ -1,0 +1,44 @@
+﻿/4F1R#select fan 2	
+/4P255R#Turn fan on
+/4F0R#select fan 1	
+/4P255R#Turn fan on
+/4F2R#select fan 2	
+/4P255R#Turn fan on
+
+ALERT,Are all fans running?
+
+/4N0R#select channel 1
+/4U4R#select thermistor 1 for channel 1
+/4t58R#set temp to 58C
+STATUS,Heating to 36C (on Laird)
+/4W255R#go half power
+/4ZR    #start controlling
+MONITORTEMPS,4440000,-1,36 #monitor temps without logging, stop when Laird reaches 36C
+ALERT,Did thermistor 1 increase in temperature to 36C?
+
+/4N1R#select channel 2
+/4U4R#select thermistor 4 for channel 2
+/4t58R#set temp to 58C
+STATUS,Heating to 36C (on Laird)
+/4W255R#go half power
+/4ZR    #start controlling
+MONITORTEMPS,4440000,-1,36 #monitor temps without logging, stop when Laird reaches 36C
+ALERT,Did thermistor 4 increase in temperature to 36C?
+
+STATUS,36C Reached; Heating to 37C
+/4N0R#select channel 1
+/4t58R#set temp to 37C
+/4W255R
+/4N1R#select channel 2
+/4t58R#set temp to 37C
+/4W255R
+
+MONITORTEMPS,4440000,-1,37 #monitor temps without logging, stop when Laird reaches 37C
+STATUS,37C Reached; Running thermo test
+/4t58R
+THERMOTEST,1240000,1000#run for 1240 secs,1 sec sampling rate
+ALERT,Turning controller/fan off
+/4xR#stop controlling
+/4P0R#Turn fan off
+EXECUTE,python PlotThermoTest.py Right
+

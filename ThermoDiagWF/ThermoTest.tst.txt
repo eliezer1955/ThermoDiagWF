@@ -7,17 +7,17 @@
 /4U0R#select thermistor 1 for channel 1
 /4N1R#select channel 2
 /4N1R#select channel 1 (block peltier)
-/4t70R#set temp to 50C
+/4t58R#set temp to 58C
 STATUS,Heating to 36C (on Laird)
-/4W200R#go half power
+/4W255R#go half power
 /4ZR    #start controlling
 MONITORTEMPS,4440000,-1,36 #monitor temps without logging, stop when Laird reaches 34C
 STATUS,36C Reached; Heating to 37C
-/4t56R#set temp to 37C
+/4t58R#set temp to 37C
 /4W255R
 MONITORTEMPS,4440000,-1,37 #monitor temps without logging, stop when Laird reaches 37C
 STATUS,37C Reached; Running thermo test
-/4t56R
+/4t58R
 THERMOTEST,1240000,1000#run for 1240 secs,1 sec sampling rate
 ALERT,Turning controller/fan off
 /4xR#stop controlling
