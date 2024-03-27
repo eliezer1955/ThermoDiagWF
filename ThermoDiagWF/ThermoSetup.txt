@@ -45,7 +45,8 @@ STATUS,Programming thermistor coefficients + control channels
 /4ER     #save to EEPROM
 :again
 STATUS,Configuration saved to EEPROM: now testing fan control
-#ALERT,Turning fan off
+
+STATUS,Test Fan control
 /4F0R    #select fan 1
 /4V2500R
 /4P0R  #set  power for fan 1
@@ -55,20 +56,24 @@ STATUS,Configuration saved to EEPROM: now testing fan control
 /4P0R
 /4V2500R
 :FANON
-#LERT,Turning fan 1 on
+ALERT,Turning fan 1 on
 /4F0R
 /4P255R
 STATUS,Fan 1 on, monitoring temperatures
+ALERT,Is fan 1 (chiller) on?
 MONITORTEMPS,10000
 #ALERT,Turning fan 2 on
 STATUS,Fan 1 on, monitoring temperatures
 /4F1R
 /4P255R
 MONITORTEMPS,10000
-#ALERT,Turning fan 3 on
+ALERT,Is Fan 2 on?
+ALERT,Turning fan 3 on
+/4F2R
 STATUS,Fan 3 on, monitoring temperatures
 /4P255R
 MONITORTEMPS,10000
+ALERT,Is Fan 3 On?
 /4V2500R
 /4ER     #save to EEPROM
 #/4ER     #save to EEPROM
@@ -76,9 +81,6 @@ MONITORTEMPS,10000
 STATUS,all fans on, monitoring temperatures
 MONITORTEMPS,10000
 STATUS,Switching all fans off
-#ALERT,Turning fan 1 off
-/4F0R
-/4P0R
 #ALERT,Turning fan 2 off
 /4F1R
 /4P0R
@@ -88,3 +90,6 @@ STATUS,Switching all fans off
 /4V2500R
 STATUS,all fans on, monitoring temperatures
 MONITORTEMPS,10000
+#Make sure chiller fan is on
+/4F0R
+/4P255R

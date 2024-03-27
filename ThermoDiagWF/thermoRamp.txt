@@ -32,6 +32,7 @@ STATUS,Start chiller cooldown
 /4U5R#select thermistor 6 for channel 3
 /4t2R#set temp to 2C
 /4W255R#go full power
+SLEEP,2000
 /4ZR    #start controlling
 
 STATUS,Ramp up left bay
@@ -43,6 +44,7 @@ LOGERROR, Left Ramp up
 STATUS,Heating left block 
 /4W255R#go full power
 /4ZR    #start controlling
+SLEEP,2000
 GETTEMP,1
 MONITORTEMPS,300000,1,%response%+25,0 #monitor temps while logging
 
@@ -52,6 +54,7 @@ STATUS,Ramp down left bay
 STATUS,Cooling left block to 4C
 /4W255R#go full power
 /4ZR    #start controlling
+SLEEP,2000
 MONITORTEMPS,900000,1,-4,0 #monitor temps while logging
 /4xR#stop controlling
 /4W0R#go zero power
@@ -64,6 +67,7 @@ LOGERROR, Right  Ramp up
 STATUS,Heating right block 
 /4W255R#go full power
 /4ZR    #start controlling
+SLEEP,2000
 GETTEMP,4
 MONITORTEMPS,300000,1,%response%+25,3 #monitor temps while logging
 
@@ -73,6 +77,7 @@ LOGERROR, Right  Ramp down
 STATUS,Cooling right block to 4C 
 /4W255R#go full power
 /4ZR    #start controlling
+SLEEP,2000
 MONITORTEMPS,900000,1,-4,3 #monitor temps while logging
 ALERT,Turning controller/fan off
 /4xR#stop controlling
@@ -86,6 +91,7 @@ STATUS,Ramp down chiller
 STATUS,Cooling chiller to 4C 
 /4W255R#go full power
 /4ZR    #start controlling
+SLEEP,2000
 MONITORTEMPS,2100000,1,-2,5 #monitor temps while logging
 ALERT,Turning controller/fan off
 /4xR#stop controlling
